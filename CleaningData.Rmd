@@ -21,7 +21,7 @@ Tasks:
 
 ```{r}
 library(tidyverse)
-dat <- read.csv('data_2022_2023.csv')
+dat <- read.csv('./data_2022_2023.csv')
 
 
 datclean <- dat %>% 
@@ -36,7 +36,8 @@ men <- datclean %>% filter(Gender == 'm')
 
 women <- datclean %>% filter(Gender == 'w')
 
-
+write.csv(x = men, "cleaned_mens_data.csv")
+write.csv(x = women, "cleaned_womens_data.csv")
 ```
 
 
