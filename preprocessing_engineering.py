@@ -52,7 +52,7 @@ def create_datetime_separated(data):
 def rof_engineered(times, data):
   time_dictionary = {}
   for time in tqdm(times):
-    for i, entry in tqdm(time.iterrows()):
+    for i, entry in time.iterrows():
       apparatus = entry.Apparatus
       last = entry.names
       key = f"{apparatus}_{last}"
@@ -85,6 +85,3 @@ if __name__ == "__main__":
     convert_names(male_data)
     time_list = create_datetime_separated(male_data)
     rof_engineered(time_list, male_data)
-
-    female_data.to_csv("processed_female_data.csv", index=False)
-    male_data.to_csv("processed_male_data.csv", index=False)
