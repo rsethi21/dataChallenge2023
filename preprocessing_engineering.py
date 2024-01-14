@@ -85,3 +85,6 @@ if __name__ == "__main__":
     convert_names(male_data)
     time_list = create_datetime_separated(male_data)
     rof_engineered(time_list, male_data)
+
+    male_data.to_csv("processed_male_data.csv")
+    female_data.to_csv("processed_female_data.csv")

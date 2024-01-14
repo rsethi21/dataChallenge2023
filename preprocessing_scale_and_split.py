@@ -8,7 +8,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-m", "--male", help="path to input csv male", required=True)
 parser.add_argument("-f", "--female", help="path to input csv female", required=True)
 parser.add_argument("-c", "--columns", help="columns to scale", nargs="*", required=False, default=None)
-parser.add_argument("-s", "--split", help="train split out of 100", required=False, type=int, default=80)
+# parser.add_argument("-s", "--split", help="train split out of 100", required=False, type=int, default=80)
 
 def scale_columns(data, columns, scaler=None):
     if scaler == None:
@@ -19,12 +19,20 @@ def scale_columns(data, columns, scaler=None):
         data.loc[:,col] = transformed.loc[:,col]
     return scaler
 
-def separate(data, percent_train):
+def separate(data):
+    '''
     competition_list = data.Competition.unique()
     X_train, X_test = train_test_split(competition_list, train_size=percent_train/100.0, random_state=2024)
     train_indices = [i for i, entry in data.iterrows() if entry.Competition in X_train]
     test_indices = [i for i, entry in data.iterrows() if entry.Competition in X_test]
     return data.loc[train_indices,:].reset_index(inplace=False), data.loc[test_indices,:].reset_index(inplace=False)
+    '''
+    competition_to_use = "2022 U.S. Classic"
+    Country = "USA"
+    Round = "AAfinal"
+    test_indices = list(data[(data.Competition==competition_to_use) & (data.Country==Country) & (data.Round==Round)].index)
+    train_indices = [i for i in data.index if i not in test_indices]
+    return data.loc[train_indices,:], data.loc[test_indices,:]
 
 if __name__ == "__main__":
     
@@ -40,8 +48,8 @@ if __name__ == "__main__":
         with open("female_scaler.pkl", "wb") as female_scaler_file:
             pickle.dump(female_scaler, female_scaler_file)
 
-    train_male, test_male = separate(male_data, args.split)
-    train_female, test_female = separate(female_data, args.split)
+    train_male, test_male = separate(male_data)
+    train_female, test_female = separate(female_data)
 
     train_male.to_csv("./train_male_data.csv", index=True)
     test_male.to_csv("./test_male_data.csv", index=True)

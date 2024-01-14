@@ -29,7 +29,7 @@ datclean <- dat %>%
   filter(Score != 0) %>%
   mutate(FirstName = toupper(FirstName), LastName = toupper(LastName)) %>%
   mutate(Apparatus= ifelse(Apparatus == 'hb', 'HB', Apparatus)) %>%
-  select(LastName, FirstName, Gender, Competition, Country, Date, Round, Apparatus, Rank, Score)
+  select(LastName, FirstName, Gender, Competition, Country, Date, Round, Apparatus, Rank, Score, Location)
 
 
 men <- datclean %>% filter(Gender == 'm')
