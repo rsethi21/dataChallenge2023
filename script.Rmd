@@ -20,15 +20,20 @@ train_male = select(train_male, -c("X", "Unnamed..0", "Unnamed..0.1"))
 ```
 
 ```{r}
-model = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change + Location + names, data=train_male)
+model = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change + Location + names + average_apparatus_rank, data=train_male)
 summary(model)
-model_wo_location = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change + names, data=train_male)
-summary(model_wo_location)
-model_wo_names = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change + Location, data=train_male)
-summary(model_wo_names)
-model_simple = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change, data=train_male)
-summary(model_simple)
+model_wo_location = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change + names + average_apparatus_rank, data=train_male)
+# summary(model_wo_location)
+model_wo_names = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change + Location + average_apparatus_rank, data=train_male)
+# summary(model_wo_names)
+model_simple = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change + average_apparatus_rank, data=train_male)
+# summary(model_simple)
+save(model, file="female_full_model.rda")
+save(model_wo_location, file="female_no_location_model.rda")
+save(model_wo_names, file="female_no_names_model.rda")
+save(model_simple, file="female_no_names_nor_location_model.rda")
 ```
+
 ```{r}
 plot(model, 1)
 ```
@@ -44,29 +49,30 @@ test_male = select(test_male, -c("X", "Unnamed..0", "Unnamed..0.1"))
 ```
 
 ```{r}
-indices = as.numeric(rownames(test_male[test_male$Apparatus == "HB",]))
-new_data = test_male[indices, c(2,3,4,7,8,9,10)]
-truth = c()
+appar = "FX"
+dataset = test_male
+train_dataset = train_male
+indices = as.numeric(rownames(dataset[dataset$Apparatus == appar,]))
 predictions = c()
+new_data = dataset[indices, c(2,3,4,7,8,9,10,11)]
 for (i in indices) {
-  truth = c(truth, test_male[i, 6])
   location = TRUE
   name = TRUE
-  if (!(test_male[i,9] %in% train_male[,9])){
+  if (!(dataset[i,9] %in% train_dataset[,9])){
     name = FALSE
   }
-  if(!(test_male[i,7] %in% train_male[,7])){
+  if(!(dataset[i,7] %in% train_dataset[,7])){
     location = FALSE
   }
   if (location==TRUE & name==TRUE){
-    prediction = predict(model, newdata=test_male[i,c(2,3,4,7,8,9,10)])
+    prediction = predict(model, newdata=dataset[i,c(2,3,4,7,8,9,10,11)])
   } else if (location ==FALSE & name==FALSE) {
-    prediction = predict(model_simple, newdata=test_male[i,c(2,3,4,8,10)])
+    prediction = predict(model_simple, newdata=dataset[i,c(2,3,4,8,10,11)])
   } else {
     if (location) {
-      prediction = predict(model_wo_names, newdata=test_male[i,c(2,3,4,7,8,10)])
+      prediction = predict(model_wo_names, newdata=dataset[i,c(2,3,4,7,8,10,11)])
     } else if (name){
-      prediction = predict(model_wo_location, newdata=test_male[i,c(2,3,4,8,9,10)])
+      prediction = predict(model_wo_location, newdata=dataset[i,c(2,3,4,8,9,10,11)])
     }
   }
   predictions = c(predictions, prediction)
@@ -74,10 +80,31 @@ for (i in indices) {
 ```
 
 ```{r}
-truth
+truths = test_male[indices,5]
 ```
 
 ```{r}
-predictions
+ranks = rank(1/predictions, ties.method="min")
+```
+
+```{r}
+sum(abs(truths - ranks))/length(truths)
+```
+```{r}
+all_data = rbind(train_male, test_male)
+
+
+model = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change + Location + names + average_apparatus_rank, data=all_data)
+summary(model)
+model_wo_location = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change + names + average_apparatus_rank, data=all_data)
+# summary(model_wo_location)
+model_wo_names = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change + Location + average_apparatus_rank, data=all_data)
+# summary(model_wo_names)
+model_simple = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change + average_apparatus_rank, data=all_data)
+# summary(model_simple)
+save(model, file="male_full_model.rda")
+save(model_wo_location, file="male_no_location_model.rda")
+save(model_wo_names, file="male_no_names_model.rda")
+save(model_simple, file="male_no_names_nor_location_model.rda")
 ```
 
