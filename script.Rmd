@@ -1,0 +1,83 @@
+---
+title: "linear_model_trial"
+author: "Rohan Sethi"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+install.packages("dplyr")
+library("dplyr")
+```
+
+```{r}
+train_male = read.csv("./train_male_data.csv")
+train_male = select(train_male, -c("X", "Unnamed..0", "Unnamed..0.1"))
+```
+
+```{r}
+model = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change + Location + names, data=train_male)
+summary(model)
+model_wo_location = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change + names, data=train_male)
+summary(model_wo_location)
+model_wo_names = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change + Location, data=train_male)
+summary(model_wo_names)
+model_simple = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change, data=train_male)
+summary(model_simple)
+```
+```{r}
+plot(model, 1)
+```
+
+
+```{r}
+plot(model, 2)
+```
+
+```{r}
+test_male = read.csv("test_male_data.csv")
+test_male = select(test_male, -c("X", "Unnamed..0", "Unnamed..0.1"))
+```
+
+```{r}
+indices = as.numeric(rownames(test_male[test_male$Apparatus == "HB",]))
+new_data = test_male[indices, c(2,3,4,7,8,9,10)]
+truth = c()
+predictions = c()
+for (i in indices) {
+  truth = c(truth, test_male[i, 6])
+  location = TRUE
+  name = TRUE
+  if (!(test_male[i,9] %in% train_male[,9])){
+    name = FALSE
+  }
+  if(!(test_male[i,7] %in% train_male[,7])){
+    location = FALSE
+  }
+  if (location==TRUE & name==TRUE){
+    prediction = predict(model, newdata=test_male[i,c(2,3,4,7,8,9,10)])
+  } else if (location ==FALSE & name==FALSE) {
+    prediction = predict(model_simple, newdata=test_male[i,c(2,3,4,8,10)])
+  } else {
+    if (location) {
+      prediction = predict(model_wo_names, newdata=test_male[i,c(2,3,4,7,8,10)])
+    } else if (name){
+      prediction = predict(model_wo_location, newdata=test_male[i,c(2,3,4,8,9,10)])
+    }
+  }
+  predictions = c(predictions, prediction)
+}
+```
+
+```{r}
+truth
+```
+
+```{r}
+predictions
+```
+
