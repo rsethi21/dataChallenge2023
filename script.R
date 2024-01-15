@@ -1,20 +1,13 @@
 args = commandArgs(TRUE)
-train_data = args[[1]]
-test_data = args[[2]]
-names = args[[3]]
-apparatus = args[[4]]
-rounds = args[[5]]
-output = args[[6]]
+data = args[[1]]
+names = args[[2]]
+apparatus = args[[3]]
+rounds = args[[4]]
+output = args[[5]]
 
-print("Open and Clean-up Train Set")
-train = read.csv(train_data)
-train = train[,colnames(train)[! colnames(train) %in% c("X", "Unnamed..0", "Unnamed..0.1")]]
-print("Open and Clean-up Test Set")
-test = read.csv(test_data)
-test = test[,colnames(test)[! colnames(test) %in% c("X", "Unnamed..0", "Unnamed..0.1")]]
-
-print("Combine Datasets")
-all_data = rbind(train, test)
+print("Open and Clean-up Dataset")
+all_data = read.csv(data)
+all_data = all_data[,colnames(all_data)[! colnames(all_data) %in% c("X", "Unnamed..0", "Unnamed..0.1")]]
 
 print("Training Model...")
 model = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change + Location + names + average_apparatus_rank, data=all_data)
