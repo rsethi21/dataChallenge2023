@@ -15,7 +15,7 @@ def days_engineered(data):
   years = []
   months = []
   rough_dates = []
-  for entry in data.loc[:,"Date"]:
+  for entry in tqdm(data.loc[:,"Date"], desc="finding days till paris"):
     year = entry[-4:]
     month = entry.split(" ")[1]
     years.append(year)
@@ -29,7 +29,7 @@ def days_engineered(data):
 
 def convert_names(data):
   names = []
-  for i, entry in data.iterrows():
+  for i, entry in tqdm(data.iterrows(), total=len(data.index), desc="rewriting name column"):
     try:
       names.append(f"{entry.FirstName.upper()} {entry.LastName.upper()}")
     except:
@@ -52,7 +52,7 @@ def create_datetime_separated(data):
 
 def rof_engineered(times, data):
   time_dictionary = {}
-  for time in tqdm(times):
+  for time in times:
     for i, entry in time.iterrows():
       apparatus = entry.Apparatus
       last = entry.names
@@ -62,7 +62,7 @@ def rof_engineered(times, data):
       else:
         time_dictionary[key].append((entry.days_till_paris, entry.Score))
   data["rate_of_change"] = [None for _ in range(len(data.index))]
-  for key, value in tqdm(time_dictionary.items()):
+  for key, value in tqdm(time_dictionary.items(), total=len(time_dictionary), desc="creating rate of change column"):
     apparatus, name = key.split("_")
     try:
         arof = (value[-1][1] - value[0][1]) / abs(value[-1][0] - value[0][0])
@@ -83,7 +83,7 @@ def average_ranks(data):
       else:
         rank_dictionary[key].append(entry.Rank)
     data["average_apparatus_rank"] = [0 for _ in range(len(data.index))]
-    for key, value in tqdm(rank_dictionary.items()):
+    for key, value in tqdm(rank_dictionary.items(), total=len(data.index), desc="creating average apparatus rank column"):
         apparatus, name = key.split("_")
         average = sum(value)/len(value)
         entries = data[(data.Apparatus == apparatus)&(data.names == name)].index
@@ -93,20 +93,24 @@ def average_ranks(data):
 
 if __name__ == "__main__":
     args = parser.parse_args()
+    print("Opening male and female datasets...")
     male_data = pd.read_csv(args.male)
     female_data = pd.read_csv(args.female)
     
+    print("Engineering data for female data...")
     days_engineered(female_data)
     convert_names(female_data)
     time_list = create_datetime_separated(female_data)
     rof_engineered(time_list, female_data)
     average_ranks(female_data)
 
+    print("Engineering data for male data...")
     days_engineered(male_data)
     convert_names(male_data)
     time_list = create_datetime_separated(male_data)
     rof_engineered(time_list, male_data)
     average_ranks(male_data)
     
+    print("Saving data...")
     male_data.to_csv(os.path.join(args.output, "processed_male_data.csv"))
     female_data.to_csv(os.path.join(args.output, "processed_female_data.csv"))

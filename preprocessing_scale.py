@@ -23,9 +23,11 @@ def scale_columns(data, columns, scaler=None):
 if __name__ == "__main__":
     
     args = parser.parse_args()
+    print("Opening Male and Female Data...")
     male_data = pd.read_csv(args.male)
     female_data = pd.read_csv(args.female)
     
+    print("Scaling columns...")
     if args.columns != None:
         male_scaler = scale_columns(male_data, args.columns)
         female_scaler = scale_columns(female_data, args.columns)
@@ -33,5 +35,7 @@ if __name__ == "__main__":
             pickle.dump(male_scaler, male_scaler_file)
         with open(os.path.join(args.output, "female_scaler.pkl"), "wb") as female_scaler_file:
             pickle.dump(female_scaler, female_scaler_file)
+    
+    print("Saving data...")
     male_data.to_csv(os.path.join(args.output, "scaled_male_data.csv"))
-     female_data.to_csv(os.path.join(args.output, "scaled_female_data.csv"))
+    female_data.to_csv(os.path.join(args.output, "scaled_female_data.csv"))
