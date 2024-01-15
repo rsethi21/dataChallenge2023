@@ -8,6 +8,7 @@ import datetime
 parser = argparse.ArgumentParser()
 parser.add_argument("-m", "--male", help="input path to male dataframe", required=True)
 parser.add_argument("-f", "--female", help="input path to female dataframe", required=True)
+parser.add_argument("-o", "--output", help="path to output data folder", required=False, default=".")
 
 def days_engineered(data):
   month_dictionary = {"Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4, "May": 5, "Jun": 6, "Jul": 7, "Aug": 8, "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12}
@@ -107,5 +108,5 @@ if __name__ == "__main__":
     rof_engineered(time_list, male_data)
     average_ranks(male_data)
     
-    male_data.to_csv("processed_male_data.csv")
-    female_data.to_csv("processed_female_data.csv")
+    male_data.to_csv(os.path.join(args.output, "processed_male_data.csv"))
+    female_data.to_csv(os.path.join(args.output, "processed_female_data.csv"))

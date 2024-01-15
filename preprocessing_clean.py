@@ -24,5 +24,5 @@ if __name__ == "__main__":
     male = data.loc[:,data.Gender == "m"]
     female = data.loc[:,data.Gender == "f"]
 
-    male.to_csv(os.path.join(f"{args.output}", "cleaned_mens_data.csv"))
-    female.to_csv(os.path.join(f"{args.output}", "cleaned_womens_data.csv"))
+    male.to_csv(os.path.join(args.output, "cleaned_mens_data.csv"))
+    female.to_csv(os.path.join(args.output, "cleaned_womens_data.csv"))
