@@ -71,6 +71,24 @@ def rof_engineered(times, data):
     for i in entries:
       data.loc[i,"rate_of_change"] = arof
 
+def average_ranks(data):
+    rank_dictionary = {}
+    for i, entry in data.iterrows():
+      apparatus = entry.Apparatus
+      last = entry.names
+      key = f"{apparatus}_{last}"
+      if key not in rank_dictionary.keys():
+        rank_dictionary[key] = [entry.Rank]
+      else:
+        rank_dictionary[key].append(entry.Rank)
+    data["average_apparatus_rank"] = [None for _ in range(len(data.index))]
+    for key, value in tqdm(rank_dictionary.items()):
+        apparatus, name = key.split("_")
+        average = sum(value)/len(value)
+        entries = data[(data.Apparatus == apparatus)&(data.names == name)].index
+        for i in entries:
+            data.loc[i,"average_apparatus_rank"] = average
+
 if __name__ == "__main__":
     args = parser.parse_args()
     male_data = pd.read_csv(args.male)
@@ -80,11 +98,13 @@ if __name__ == "__main__":
     convert_names(female_data)
     time_list = create_datetime_separated(female_data)
     rof_engineered(time_list, female_data)
+    average_ranks(female_data)
 
     days_engineered(male_data)
     convert_names(male_data)
     time_list = create_datetime_separated(male_data)
     rof_engineered(time_list, male_data)
-
+    average_ranks(male_data)
+    
     male_data.to_csv("processed_male_data.csv")
     female_data.to_csv("processed_female_data.csv")
