@@ -1,109 +1,52 @@
----
-title: "linear_model_trial"
-author: "Rohan Sethi"
-date: "`r Sys.Date()`"
-output: html_document
----
+args = commandArgs(TRUE)
+train_data = args[[1]]
+test_data = args[[2]]
+names = args[[3]]
+apparatus = args[[4]]
+rounds = args[[5]]
+output = args[[6]]
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+print("Open and Clean-up Train Set")
+train = read.csv(train_data)
+train = train[,colnames(train)[! colnames(train) %in% c("X", "Unnamed..0", "Unnamed..0.1")]]
+print("Open and Clean-up Test Set")
+test = read.csv(test_data)
+test = test[,colnames(test)[! colnames(test) %in% c("X", "Unnamed..0", "Unnamed..0.1")]]
 
-```{r}
-library("dplyr")
-```
+print("Combine Datasets")
+all_data = rbind(train, test)
 
-```{r}
-train_male = read.csv("./train_male_data.csv")
-train_male = select(train_male, -c("X", "Unnamed..0", "Unnamed..0.1"))
-```
+print("Training Model...")
+model = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change + Location + names + average_apparatus_rank, data=all_data)
 
-```{r}
-model = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change + Location + names + average_apparatus_rank, data=train_male)
-summary(model)
-model_wo_location = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change + names + average_apparatus_rank, data=train_male)
-# summary(model_wo_location)
-model_wo_names = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change + Location + average_apparatus_rank, data=train_male)
-# summary(model_wo_names)
-model_simple = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change + average_apparatus_rank, data=train_male)
-# summary(model_simple)
-save(model, file="female_full_model.rda")
-save(model_wo_location, file="female_no_location_model.rda")
-save(model_wo_names, file="female_no_names_model.rda")
-save(model_simple, file="female_no_names_nor_location_model.rda")
-```
-
-```{r}
-plot(model, 1)
-```
-
-
-```{r}
-plot(model, 2)
-```
-
-```{r}
-test_male = read.csv("test_male_data.csv")
-test_male = select(test_male, -c("X", "Unnamed..0", "Unnamed..0.1"))
-```
-
-```{r}
-appar = "FX"
-dataset = test_male
-train_dataset = train_male
-indices = as.numeric(rownames(dataset[dataset$Apparatus == appar,]))
-predictions = c()
-new_data = dataset[indices, c(2,3,4,7,8,9,10,11)]
-for (i in indices) {
-  location = TRUE
-  name = TRUE
-  if (!(dataset[i,9] %in% train_dataset[,9])){
-    name = FALSE
-  }
-  if(!(dataset[i,7] %in% train_dataset[,7])){
-    location = FALSE
-  }
-  if (location==TRUE & name==TRUE){
-    prediction = predict(model, newdata=dataset[i,c(2,3,4,7,8,9,10,11)])
-  } else if (location ==FALSE & name==FALSE) {
-    prediction = predict(model_simple, newdata=dataset[i,c(2,3,4,8,10,11)])
-  } else {
-    if (location) {
-      prediction = predict(model_wo_names, newdata=dataset[i,c(2,3,4,7,8,10,11)])
-    } else if (name){
-      prediction = predict(model_wo_location, newdata=dataset[i,c(2,3,4,8,9,10,11)])
+print("Creating Prediction DataFrame")
+i = 1
+country = "USA"
+paris = 0
+loc = "Paris, France"
+rounds = read.csv(rounds)$round
+names = read.csv(names)$Name
+apparatus = read.csv(apparatus)$apparatus
+output_names <- c()
+output_rounds <- c()
+output_apparatus <- c()
+output_score <- c()
+for (n in names) {
+  for (r in rounds) {
+    for (a in apparatus) {
+      index = as.numeric(rownames(all_data[all_data$Apparatus == a & all_data$names == n & all_data$Round == r,]))[1]
+      average_app_rank = all_data[index,"average_apparatus_rank"]
+      average_rof = all_data[index,"rate_of_change"]
+      output_names <- c(output_names, n)
+      output_rounds <- c(output_rounds, r)
+      output_apparatus <- c(output_apparatus, a)
+      output_score <- c(output_score, predict(model, data.frame(Country=country, Round=r, Apparatus=a, Location=loc, days_till_paris=paris, names=n, rate_of_change=average_rof, average_apparatus_rank= average_app_rank)))
     }
   }
-  predictions = c(predictions, prediction)
+  i = i + 1
+  cat("\r",paste0(round(i / length(names) * 100), '% completed'))
 }
-```
 
-```{r}
-truths = test_male[indices,5]
-```
-
-```{r}
-ranks = rank(1/predictions, ties.method="min")
-```
-
-```{r}
-sum(abs(truths - ranks))/length(truths)
-```
-```{r}
-all_data = rbind(train_male, test_male)
-
-
-model = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change + Location + names + average_apparatus_rank, data=all_data)
-summary(model)
-model_wo_location = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change + names + average_apparatus_rank, data=all_data)
-# summary(model_wo_location)
-model_wo_names = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change + Location + average_apparatus_rank, data=all_data)
-# summary(model_wo_names)
-model_simple = lm(Score ~ Country + Apparatus + Round + days_till_paris + rate_of_change + average_apparatus_rank, data=all_data)
-# summary(model_simple)
-save(model, file="male_full_model.rda")
-save(model_wo_location, file="male_no_location_model.rda")
-save(model_wo_names, file="male_no_names_model.rda")
-save(model_simple, file="male_no_names_nor_location_model.rda")
-```
-
+print("Saving Predictions to CSV")
+frame = data.frame(name=output_names, round=output_rounds, apparatus=output_apparatus, predicted_score=output_score)
+write.csv(frame, output)
