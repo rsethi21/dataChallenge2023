@@ -81,13 +81,14 @@ def average_ranks(data):
         rank_dictionary[key] = [entry.Rank]
       else:
         rank_dictionary[key].append(entry.Rank)
-    data["average_apparatus_rank"] = [None for _ in range(len(data.index))]
+    data["average_apparatus_rank"] = [0 for _ in range(len(data.index))]
     for key, value in tqdm(rank_dictionary.items()):
         apparatus, name = key.split("_")
         average = sum(value)/len(value)
         entries = data[(data.Apparatus == apparatus)&(data.names == name)].index
         for i in entries:
             data.loc[i,"average_apparatus_rank"] = average
+    data["average_apparatus_rank"].fillna(0, inplace=True)
 
 if __name__ == "__main__":
     args = parser.parse_args()
