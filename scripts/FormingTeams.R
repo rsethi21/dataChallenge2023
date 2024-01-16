@@ -24,7 +24,7 @@ for(x in 1:100){
 
 final_men_team <- common %>% mutate(sum_predicted_score = predicted_score.x + predicted_score.y + predicted_score.x.x + predicted_score.y.y + predicted_score.x.x.x + predicted_score.y.y.y) %>% arrange(-sum_predicted_score) %>% head(5) %>% pull(name)
 
-
+print(final_men_team)
 
 
 dat <- read.csv(female_path) %>% filter(round == 'AAfinal', !(is.na(predicted_score)))
@@ -44,7 +44,7 @@ for(x in 1:100){
 
 final_women_team <- common %>% mutate(sum_predicted_score = predicted_score.x + predicted_score.y + predicted_score.x.x + predicted_score.y.y) %>% arrange(-sum_predicted_score) %>% head(5) %>% pull(name)
 
-final_women_team
+print(final_women_team)
 
 
 
