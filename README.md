@@ -28,24 +28,24 @@ python3 ./scripts/preprocessing_clean.py -i ./input_data/data_2022_2023.csv -o .
 ```
 ```
 - Generally:
-python3 preprocessing_engineering.py -m male/input/path -f female/input/path -o output/path
+python3 ./scripts/preprocessing_engineering.py -m male/input/path -f female/input/path -o output/path
 - Example:
-python3 preprocessing_engineering.py -m ./output_data/cleaned_mens_data.csv -f ./output_data/cleaned_womens_data.csv -o ./output_data/
+python3 ./scripts/preprocessing_engineering.py -m ./output_data/cleaned_mens_data.csv -f ./output_data/cleaned_womens_data.csv -o ./output_data/
 ```
 ```
 - Generally:
-python3 preprocessing_scale.py -m male/input/path -f female/input/path -c column/names/space/delimited -o output/path
+python3 ./scripts/preprocessing_scale.py -m male/input/path -f female/input/path -c column/names/space/delimited -o output/path
 - Example:
-python3 preprocessing_scale.py -m ./output_data/processed_male_data.csv -f ./output_data/processed_female_data.csv -c Score days_till_paris average_apparatus_rank rate_of_change -o ./output_data
+python3 ./scripts/preprocessing_scale.py -m ./output_data/processed_male_data.csv -f ./output_data/processed_female_data.csv -c Score days_till_paris average_apparatus_rank rate_of_change -o ./output_data
 ```
 ```
 - Generally:
-Rscript model_n_predict.R path/to/male/or/female/data path/to/list/of/male/or/female/usa/names path/to/list/of/male/or/female/apparatus path/to/rounds/list output/path
+Rscript ./scripts/model_n_predict.R path/to/male/or/female/data path/to/list/of/male/or/female/usa/names path/to/list/of/male/or/female/apparatus path/to/rounds/list output/path
 - Example:
 	- Female Data:
-	Rscript model_n_predict.R ./output_data/scaled_female_data.csv ./input_data/usa_female_namelist.csv ./input_data/women_apparatus.csv ./input_data/rounds.csv ./output_data/female_predictions.csv
+	Rscript ./scripts/model_n_predict.R ./output_data/scaled_female_data.csv ./input_data/usa_female_namelist.csv ./input_data/women_apparatus.csv ./input_data/rounds.csv ./output_data/female_predictions.csv
 	- Male Data:
-	Rscript model_n_predict.R ./output_data/scaled_male_data.csv ./input_data/usa_male_namelist.csv ./input_data/men_apparatus.csv ./input_data/rounds.csv ./output_data/male_predictions.csv
+	Rscript ./scripts/model_n_predict.R ./output_data/scaled_male_data.csv ./input_data/usa_male_namelist.csv ./input_data/men_apparatus.csv ./input_data/rounds.csv ./output_data/male_predictions.csv
 ```
 ```
 - Generally:
