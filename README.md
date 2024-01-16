@@ -49,7 +49,7 @@ Rscript ./scripts/model_n_predict.R path/to/male/or/female/data path/to/list/of/
 ```
 ```
 - Generally:
-Rscript FormingTeams.R path/to/male/data path/to/female/data
+Rscript ./scripts/FormingTeams.R path/to/male/data path/to/female/data
 - Example:
-Rscript FormingTeams.R ./output_data/male_predictions.csv ./output_data/female_predictions.csv
+Rscript ./scripts/FormingTeams.R ./output_data/male_predictions.csv ./output_data/female_predictions.csv
 ```
